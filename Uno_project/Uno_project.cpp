@@ -17,31 +17,112 @@ const int MAX_STRING_SIZE = 100;
 
 /////Utility functions/////
 void shuffleDeck(int deck[], const int number) {
-
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(deck, deck + number, gen);
 }
 
 void findCardColour(const int card, char* out) {
-
+    //red cards 0-25, green cards 26-51, blue cards 52-77, yellow cards 78-103, wild cards 104-111
+    if (!out) {
+        return;
+    }
+    int colour = card / NUM_OF_CARDS_PER_COLOUR;
+    switch (colour) {
+    case 0:
+        out[0] = 'R';
+        break;
+    case 1:
+        out[0] = 'G';
+        break;
+    case 2:
+        out[0] = 'B';
+        break;
+    case 3:
+        out[0] = 'Y';
+        break;
+    default:
+        out[0] = 'W';
+        break;
+    }
+    out[1] = '\0';
 }
 
 bool isCardWild(const int card) {
-
+    return (card >= 104);
 }
 
 void findCardValue(const int card, char* out) {
-
+    if (!out) {
+        return;
+    }
+    int value = card % DIFFERENT_CARDS_OF_ONE_COLOUR;
+    //0-9 numbers, 10 skip, 11 reverse, 12 +2
+    if (!isCardWild(card)) {
+        if (value < 10) {
+            out[0] = '0' + value;
+        }
+        else if (value == 10) {
+            out[0] = 'S';
+        }
+        else if (value == 11) {
+            out[0] = 'R';
+        }
+        else if (value == 12) {
+            out[0] = '+';
+            out[1] = '2';
+            out[2] = '\0';
+            return;
+        }
+    }
+    else {
+        //4 is the number of wild cards of each type
+        //C stands for card
+        if (value < 4) {
+            out[0] = 'C';
+        }
+        else {
+            out[0] = 'C';
+            out[1] = '+';
+            out[2] = '4';
+            out[3] = '\0';
+            return;
+        }
+    }
+    out[1] = '\0';
 }
 
 int transformStringToInt(char* input, bool& validNumber) {
-
+    validNumber = true;
+    if (!input) {
+        return -1;
+    }
+    int choice = 0;
+    int i = 0;
+    while (input[i] != '\0') {
+        if (input[i] < '0' || input[i] > '9') {
+            validNumber = false;
+            break;
+        }
+        choice = choice * 10 + (input[i] - '0');
+        i++;
+    }
+    return choice;
 }
 
 bool isNumOfPlayersValid(const int players) {
-
+    return (players >= 2 && players <= 4);
 }
 
 int chooseNumOfPlayers() {
+    char choice;
+    do {
+        std::cout << "Enter number of players (2-4): " << std::endl;;
+        std::cin >> choice;
+        std::cin.ignore();
+    } while (choice < '2' || choice > '4');
 
+    return choice - '0';
 }
 /////Deck and hand managment/////
 void formDeck(int deck[DECK_SIZE]) {

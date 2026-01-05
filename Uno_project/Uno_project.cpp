@@ -126,32 +126,70 @@ int chooseNumOfPlayers() {
 }
 /////Deck and hand managment/////
 void formDeck(int deck[DECK_SIZE]) {
-
+    for (int i = 0; i < DECK_SIZE; i++) {
+        deck[i] = i;
+    }
+    shuffleDeck(deck, DECK_SIZE);
 }
 
 void dealCards(int deck[], int hands[][DECK_SIZE], const int players, int& deckIndex, int handSize[]) {
-
+    for (int card = 0; card < STARTING_CARDS; card++) {
+        for (int p = 0; p < players; p++) {
+            hands[p][handSize[p]] = deck[deckIndex++];
+            handSize[p]++;
+        }
+    }
 }
 
 void reshuffleDiscardPileIntoDeck(int deck[], int& deckIndex, int discardPile[], int& discardSize, int& currentDeckSize) {
+    int topCard = discardPile[discardSize - 1];
+    currentDeckSize = discardSize - 1;
+    //put discard cards back in the deck
+    for (int i = 0; i < currentDeckSize; i++) {
+        deck[i] = discardPile[i];
+    }
 
+    shuffleDeck(deck, currentDeckSize);
+    deckIndex = 0;
+
+    // Reset discard pile
+    discardPile[0] = topCard;
+    discardSize = 1;
 }
 
 int flipFirstCard(const int deck[], int& deckIndex, int discardPile[], int& discardSize) {
-
+    int card = deck[deckIndex++];
+    discardPile[discardSize++] = card;
+    return card;
 }
 
 void drawCard(const int player, int deck[], int& deckIndex, int discardPile[], int& discardSize,
     int& currentDeckSize, int hands[][DECK_SIZE], int handSize[]) {
-
+        if (deckIndex >= currentDeckSize) {
+            reshuffleDiscardPileIntoDeck(deck, deckIndex, discardPile, discardSize, currentDeckSize);
+        }
+        hands[player][handSize[player]++] = deck[deckIndex++];
 }
 
 void showHand(const int player, const int hands[][DECK_SIZE], const int handSize[], char* colour, char* value) {
-
+    if (!colour || !value) {
+        return;
+    }
+    for (int i = 0; i < handSize[player]; i++) {
+        findCardColour(hands[player][i], colour);
+        findCardValue(hands[player][i], value);
+        std::cout << '[' << i << "] " << colour << value << " ";
+    }
+    std::cout << std::endl;
 }
 
 void showTopCard(const int card, char* colour, char* value) {
-
+    if (!colour || !value) {
+        return;
+    }
+    findCardColour(card, colour);
+    findCardValue(card, value);
+    std::cout << "Current card: " << colour << value << std::endl;
 }
 /////Card checks/effects/////
 bool isSkipCard(const int card) {

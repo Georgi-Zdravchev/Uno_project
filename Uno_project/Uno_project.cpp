@@ -416,24 +416,102 @@ void determineColourOfFirstCard(const int topCard, char* colour, char* value,
 /////Save/Load functions/////
 void saveGame(int players, int currentPlayer, bool clockwise, char currentColour, int hands[][DECK_SIZE],
     int deck[], int deckIndex, int currentDeckSize, int discardPile[], int discardSize, int handSize[]) {
+    std::ofstream file("savegame.txt");
+    if (!file) {
+        std::cout << "Failed to save game.\n";
+        return;
+    }
 
+    file << players << '\n';
+    file << currentPlayer << '\n';
+    file << clockwise << '\n';
+    file << currentColour << "\n\n";
+
+    file << deckIndex << '\n';
+    file << currentDeckSize << '\n';
+    //deck
+    for (int i = 0; i < currentDeckSize; i++)
+        file << deck[i] << ' ';
+
+    file << discardSize << '\n';
+    //discard pile
+    for (int i = 0; i < discardSize; i++)
+        file << discardPile[i] << ' ';
+    //hand sizes
+    for (int i = 0; i < MAX_PLAYERS; i++)
+        file << handSize[i] << ' ';
+    //hands
+    for (int p = 0; p < MAX_PLAYERS; p++) {
+        file << p << ": ";
+        for (int i = 0; i < handSize[p]; i++)
+            file << hands[p][i] << ' ';
+        file << '\n';
+    }
+
+    file.close();
+    std::cout << "Game saved.\n";
 }
 
 bool loadGame(int& players, int& currentPlayer, bool& clockwise, char& currentColour, int hands[][DECK_SIZE],
     int deck[], int& deckIndex, int& currentDeckSize, int discardPile[], int& discardSize, int handSize[]) {
+    std::ifstream file("savegame.txt");
+    if (!file) {
+        return false;
+    }
+    char test;
+    if (!(file >> test)) { // try reading one character to check if file is empty
+        return false;
+    }
+    file >> players;
+    file >> currentPlayer;
+    file >> clockwise;
+    file >> currentColour;
 
+    file >> deckIndex;
+    file >> currentDeckSize;
+
+    //deck
+    for (int i = 0; i < currentDeckSize; i++)
+        file >> deck[i];
+
+    file >> discardSize;
+    //discard
+    for (int i = 0; i < discardSize; i++)
+        file >> discardPile[i];
+
+    //hand sizes
+    for (int i = 0; i < MAX_PLAYERS; i++)
+        file >> handSize[i];
+
+    //hands
+    for (int p = 0; p < MAX_PLAYERS; p++) {
+        int index;
+        char colon;
+        file >> index >> colon;
+        for (int i = 0; i < handSize[p]; i++)
+            file >> hands[p][i];
+    }
+
+    file.close();
+    return true;
 }
 /////UI functions/////
 void homeScreen() {
-
+    std::cout << "---UNO---" << std::endl << "Choose an action:" << std::endl;
+    std::cout << "[1] New game " << std::endl;
+    std::cout << "[2] Load saved game" << std::endl;
+    std::cout << "[3] Exit" << std::endl;
 }
 
 void gameScreen() {
-
+    std::cout << "---UNO---" << std::endl;
+    std::cout << "[1] Save game" << std::endl;
+    std::cout << "[2] Continue until next turn" << std::endl;
+    std::cout << "[3] Exit" << std::endl;
 }
 
 bool validateChoice(const char choice) {
-
+    return (choice >= '1' && choice <= '3');
 }
 /////Game initialisation/////
 void newGame(int deck[], int players, int& deckIndex, char& currentColour, int hands[][DECK_SIZE], char* colour, char* value,

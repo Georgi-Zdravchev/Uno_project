@@ -193,26 +193,34 @@ void showTopCard(const int card, char* colour, char* value) {
 }
 /////Card checks/effects/////
 bool isSkipCard(const int card) {
-
+    return (!isCardWild(card) && (card % DIFFERENT_CARDS_OF_ONE_COLOUR) == 10);
 }
-
 bool isReverseCard(const int card) {
-
+    return (!isCardWild(card) && (card % DIFFERENT_CARDS_OF_ONE_COLOUR) == 11);
 }
 bool isPlusTwoCard(const int card) {
-
+    return (!isCardWild(card) && (card % DIFFERENT_CARDS_OF_ONE_COLOUR) == 12);
 }
 bool isPlusFourCard(int card) {
-
+    return (isCardWild(card) && (card % DIFFERENT_CARDS_OF_ONE_COLOUR) >= 4);
 }
 
 bool canPlayCard(const int card, const char currentColour, const int topCard, char* colour, char* value) {
-
+    char valueTop[MAX_ELEMENTS_IN_DISPLAY_ARRAY];
+    findCardColour(card, colour);
+    findCardValue(card, value);
+    findCardValue(topCard, valueTop);
+    return (colour[0] == currentColour || value[0] == valueTop[0] || isCardWild(card));
 }
 
 bool hasPlayableCard(const int player, const char currentColour, const int topCard,
     const int hands[][DECK_SIZE], const int handSize[], char* colour, char* value) {
-
+        for (int i = 0; i < handSize[player]; i++) {
+            if (canPlayCard(hands[player][i], currentColour, topCard, colour, value)) {
+                return 1;
+            }
+        }
+        return 0;
 }
 /////Player actions/////
 void playCard(const int player, int cardIndex, int discardPile[], int& discardSize,

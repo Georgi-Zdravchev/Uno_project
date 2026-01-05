@@ -333,37 +333,85 @@ void automaticDraw(const int currentPlayer, int deck[], int& deckIndex, int disc
 }
 /////Game mechanics////
 void nextPlayer(int& currentPlayer, const bool clockwise, const int numPlayers) {
-
+    if (clockwise) {
+        currentPlayer = (currentPlayer + 1) % numPlayers;
+    }
+    else {
+        currentPlayer = (currentPlayer - 1 + numPlayers) % numPlayers;
+    }
 }
 
 void reverseEffect(int& currentPlayer, bool& clockwise, const int players)
 {
-
+    clockwise = !clockwise;
+    std::cout << "Direction reversed!" << std::endl;
+    if (players == 2) {
+        nextPlayer(currentPlayer, clockwise, players);//acts like skip if there are 2 players
+    }
 }
 
 void skipEffect() {
-
+    std::cout << "Next player is skipped!" << std::endl;
 }
 
 void plusTwoEffect(int targetPlayer, const bool  clockwise, const int players, int deck[],
     int& deckIndex, int discardPile[], int& discardSize, int& currentDeckSize, int hands[][DECK_SIZE], int handSize[]) {
-
-
+        std::cout << "Next player draws 2 cards and is skipped!" << std::endl;
+        drawCard(targetPlayer, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
+        drawCard(targetPlayer, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
 }
 
 void plusFourEffect(int targetPlayer, const bool  clockwise, const int players, int deck[],
     int& deckIndex, int discardPile[], int& discardSize, int& currentDeckSize, int hands[][DECK_SIZE], int handSize[]) {
-
+    std::cout << "Next player draws 4 cards and is skipped!" << std::endl;
+    for (int i = 0; i < 4; i++) {
+        drawCard(targetPlayer, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
+    }
 }
 
 void applyCardEffects(const int topCard, int& advanceCount, int currentPlayer, bool& clockwise, const int players,
     int deck[], int& deckIndex, int discardPile[], int& discardSize, int& currentDeckSize, int hands[][DECK_SIZE], int handSize[]) {
-
+    if (isSkipCard(topCard)) {
+        skipEffect();
+        advanceCount = 2;
+    }
+    if (isReverseCard(topCard)) {
+        reverseEffect(currentPlayer, clockwise, players);
+    }
+    if (isPlusTwoCard(topCard)) {
+        int target = currentPlayer;
+        nextPlayer(target, clockwise, players);
+        plusTwoEffect(target, clockwise, players, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
+        advanceCount = 2;
+    }
+    if (isPlusFourCard(topCard)) {
+        int target = currentPlayer;
+        nextPlayer(target, clockwise, players);
+        plusFourEffect(target, clockwise, players, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
+        advanceCount = 2;
+    }
 }
 
 void determineColourOfFirstCard(const int topCard, char* colour, char* value,
     char& currentColour, const int hands[][DECK_SIZE], const int handSize[]) {
-
+    if (!colour || !value) {
+        return;
+    }
+    if (isCardWild(topCard)) {
+        std::cout << "First card is a Wild!" << std::endl;
+        std::cout << "Player 1, these are your cards:" << std::endl;
+        showHand(0, hands, handSize, colour, value);
+        do {
+            std::cout << "Choose a color (R/G/B/Y): " << std::endl;
+            std::cin >> currentColour;
+            std::cin.ignore();
+        } while (currentColour != 'R' && currentColour != 'G' &&
+            currentColour != 'B' && currentColour != 'Y');
+    }
+    else {
+        findCardColour(topCard, colour);
+        currentColour = colour[0];
+    }
 }
 /////Save/Load functions/////
 void saveGame(int players, int currentPlayer, bool clockwise, char currentColour, int hands[][DECK_SIZE],

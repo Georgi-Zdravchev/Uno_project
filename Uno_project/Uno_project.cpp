@@ -516,12 +516,82 @@ bool validateChoice(const char choice) {
 /////Game initialisation/////
 void newGame(int deck[], int players, int& deckIndex, char& currentColour, int hands[][DECK_SIZE], char* colour, char* value,
     int discardPile[], int& discardSize, int& currentDeckSize, int& currentPlayer, bool& clockwise, int handSize[]) {
+    if (!colour) {
+        return;
+    }
+    formDeck(deck);
+    dealCards(deck, hands, players, deckIndex, handSize);
+    int topCard = flipFirstCard(deck, deckIndex, discardPile, discardSize);
 
+    // Determine starting color
+    determineColourOfFirstCard(topCard, colour, value, currentColour, hands, handSize);
 }
 
 void gameLoop(int discardPile[], int& discardSize, char& currentColour, const int players, char* colour, char* value,
     int deck[], int& deckIndex, int& currentDeckSize, int& currentPlayer, bool& clockwise, int hands[][DECK_SIZE], int handSize[]) {
-
+    if (!colour || !value) {
+        return;
+    }
+    int topCard = discardPile[discardSize - 1];
+    char choice;
+    while (true) {
+        gameScreen();
+        std::cin >> choice;
+        std::cin.ignore();
+        while (!validateChoice(choice)) {
+            std::cout << "Invalid number. Please try again:" << std::endl;
+            std::cin >> choice;
+            std::cin.ignore();
+        }
+        if (choice == '1') {
+            saveGame(players, currentPlayer, clockwise, currentColour, hands,
+                deck, deckIndex, currentDeckSize, discardPile, discardSize, handSize);
+            return;
+        }
+        else if (choice == '3') {
+            return;
+        }
+        else {
+            bool cardPlayed = false;
+            int advanceCount = 1;
+            bool unoDeclared = false;
+            showTopCard(topCard, colour, value);
+            if (isCardWild(topCard)) {
+                std::cout << "Current colour is: " << currentColour << std::endl;
+            }
+            std::cout << "Player " << currentPlayer + 1 << "'s turn" << std::endl;
+            std::cout << "Your cards are:" << std::endl;
+            showHand(currentPlayer, hands, handSize, colour, value);
+            if (!hasPlayableCard(currentPlayer, currentColour, topCard, hands, handSize, colour, value)) {
+                automaticDraw(currentPlayer, deck, deckIndex, discardPile, discardSize, colour, value, currentDeckSize,
+                    currentColour, topCard, cardPlayed, hands, handSize);
+            }
+            else {
+                playCard(currentPlayer, getPlayerChoice(currentPlayer, currentColour, topCard, unoDeclared, hands, handSize, colour, value),
+                    discardPile, discardSize, currentColour, hands, handSize, colour, value);
+                cardPlayed = true;
+                // UNO penalty
+                if (handSize[currentPlayer] == 1 && !unoDeclared) {
+                    std::cout << "You forgot to say UNO!" << std::endl;
+                    std::cout << "You drew a card!" << std::endl;
+                    drawCard(currentPlayer, deck, deckIndex,
+                        discardPile, discardSize, currentDeckSize, hands, handSize);
+                }
+            }
+            if (handSize[currentPlayer] == 0) {
+                std::cout << "Player " << currentPlayer + 1 << " wins!";
+                break;
+            }
+            if (cardPlayed) {
+                topCard = discardPile[discardSize - 1];
+                applyCardEffects(topCard, advanceCount, currentPlayer, clockwise, players, deck, deckIndex,
+                    discardPile, discardSize, currentDeckSize, hands, handSize);
+            }
+            for (int i = 0; i < advanceCount; i++) {
+                nextPlayer(currentPlayer, clockwise, players);
+            }
+        }
+    }
 }
 
 int main()
@@ -538,6 +608,42 @@ int main()
     int hands[MAX_PLAYERS][DECK_SIZE];
     int handSize[MAX_PLAYERS] = { 0 };
     char colour[MAX_ELEMENTS_IN_DISPLAY_ARRAY], value[MAX_ELEMENTS_IN_DISPLAY_ARRAY];
+    homeScreen();
+    char choice;
+    std::cin >> choice;
+    std::cin.ignore();
+    while (!validateChoice(choice)) {
+        std::cout << "Invalid number. Please try again:" << std::endl;
+        std::cin >> choice;
+        std::cin.ignore();
+    }
+    if (choice == '3') {
+        return 0;
+    }
+    else if (choice == '2') {
 
+        if (!loadGame(players, currentPlayer, clockwise, currentColour, hands, deck, deckIndex, currentDeckSize,
+            discardPile, discardSize, handSize)) {
+            std::cout << "No saved game found, starting new game." << std::endl;
+            players = chooseNumOfPlayers();
+            newGame(deck, players, deckIndex, currentColour, hands, colour, value, discardPile, discardSize,
+                currentDeckSize, currentPlayer, clockwise, handSize);
+        }
+        else {
+            loadGame(players, currentPlayer, clockwise, currentColour, hands, deck, deckIndex, currentDeckSize, discardPile,
+                discardSize, handSize);
+            std::cout << "Game successfully loaded." << std::endl;
+        }
+        gameLoop(discardPile, discardSize, currentColour, players, colour, value, deck,
+            deckIndex, currentDeckSize, currentPlayer, clockwise, hands, handSize);
+
+    }
+    else {
+        players = chooseNumOfPlayers();
+        newGame(deck, players, deckIndex, currentColour, hands, colour, value, discardPile, discardSize,
+            currentDeckSize, currentPlayer, clockwise, handSize);
+        gameLoop(discardPile, discardSize, currentColour, players, colour, value, deck, deckIndex,
+            currentDeckSize, currentPlayer, clockwise, hands, handSize);
+    }
     return 0;
 }

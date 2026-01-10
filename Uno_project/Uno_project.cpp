@@ -1,10 +1,26 @@
 
+//**
+//*
+//* Solution to course project # 4
+//* Introduction to programming course
+//* Faculty of Mathematics and Informatics of Sofia University
+//* Winter semester 2025/2026
+//*
+//* @author Georgi Zdravchev
+//* @idnumber 6MI0600558
+//* @compiler VC
+//*
+//* Uno game
+//*
+//*
 
 
 #include <iostream>
 #include <fstream>
 #include <random>
 #include <algorithm>
+
+using std::cin, std::cout, std::endl;
 
 /////Constants/////
 const int DECK_SIZE = 112;
@@ -14,6 +30,7 @@ const int MAX_PLAYERS = 4;
 const int STARTING_CARDS = 7;
 const int MAX_ELEMENTS_IN_DISPLAY_ARRAY = 4;
 const int MAX_STRING_SIZE = 100;
+const char unoCheck[4] = "uno";
 
 /////Utility functions/////
 void shuffleDeck(int deck[], const int number) {
@@ -92,6 +109,33 @@ void findCardValue(const int card, char* out) {
     out[1] = '\0';
 }
 
+bool compareStrings(const char* str1, const char* str2) {
+    if (!str1 || !str2) {
+        return false;
+    }
+
+    int i = 0;
+    while (str1[i] != '\0' && str2[i] != '\0') {
+        char c1 = str1[i];
+        char c2 = str2[i];
+
+        if (c1 >= 'A' && c1 <= 'Z') { 
+            c1 += 'a' - 'A';
+        }
+        if (c2 >= 'A' && c2 <= 'Z') { 
+            c2 += 'a' - 'A';
+        }
+
+        if (c1 != c2) {
+            return false;
+        }
+        i++;
+    }
+
+    return str1[i] == '\0' && str2[i] == '\0';
+}
+
+
 int transformStringToInt(char* input, bool& validNumber) {
     validNumber = true;
     if (!input) {
@@ -117,9 +161,9 @@ bool isNumOfPlayersValid(const int players) {
 int chooseNumOfPlayers() {
     char choice;
     do {
-        std::cout << "Enter number of players (2-4): " << std::endl;;
-        std::cin >> choice;
-        std::cin.ignore();
+        cout << "Enter number of players (2-4): " << endl;;
+        cin >> choice;
+        cin.ignore();
     } while (choice < '2' || choice > '4');
 
     return choice - '0';
@@ -178,9 +222,9 @@ void showHand(const int player, const int hands[][DECK_SIZE], const int handSize
     for (int i = 0; i < handSize[player]; i++) {
         findCardColour(hands[player][i], colour);
         findCardValue(hands[player][i], value);
-        std::cout << '[' << i << "] " << colour << value << " ";
+        cout << '[' << i << "] " << colour << value << " ";
     }
-    std::cout << std::endl;
+    cout << endl;
 }
 
 void showTopCard(const int card, char* colour, char* value) {
@@ -189,7 +233,7 @@ void showTopCard(const int card, char* colour, char* value) {
     }
     findCardColour(card, colour);
     findCardValue(card, value);
-    std::cout << "Current card: " << colour << value << std::endl;
+    cout << "Current card: " << colour << value << endl;
 }
 /////Card checks/effects/////
 bool isSkipCard(const int card) {
@@ -242,9 +286,9 @@ void playCard(const int player, int cardIndex, int discardPile[], int& discardSi
     // Update current color if wild
     if (isCardWild(card)) {
         do {
-            std::cout << "Choose a color (R/G/B/Y): " << std::endl;
-            std::cin >> currentColour;
-            std::cin.ignore();
+            cout << "Choose a color (R/G/B/Y): " << endl;
+            cin >> currentColour;
+            cin.ignore();
         } while (currentColour != 'R' && currentColour != 'G' &&
             currentColour != 'B' && currentColour != 'Y');
     }
@@ -255,7 +299,7 @@ void playCard(const int player, int cardIndex, int discardPile[], int& discardSi
     // Display played card
     findCardColour(card, colour);
     findCardValue(card, value);
-    std::cout << ">You used: " << colour << value << std::endl;
+    cout << ">You used: " << colour << value << endl;
 }
 
 int getPlayerChoice(const int player, const char currentColour, const int topCard,
@@ -263,24 +307,19 @@ int getPlayerChoice(const int player, const char currentColour, const int topCar
     char input[MAX_STRING_SIZE];
 
     while (true) {
-        std::cout << "Select a card index (0-" << handSize[player] - 1
-            << ')' << std::endl;
+        cout << "Select a card index (0-" << handSize[player] - 1 << ')' << endl;
 
-        std::cin.getline(input, MAX_STRING_SIZE);
+        cin.getline(input, MAX_STRING_SIZE);
         //check for uno
-        if (handSize[player] == 2 &&
-            (input[0] == 'U' || input[0] == 'u') &&
-            (input[1] == 'N' || input[1] == 'n') &&
-            (input[2] == 'O' || input[2] == 'o') &&
-            input[3] == '\0') {
+        if (handSize[player] == 2 && compareStrings(input, unoCheck)) {
 
             if (unoDeclared) {
-                std::cout << "UNO already declared.\n";
+                cout << "UNO already declared.\n";
                 continue;
             }
 
             unoDeclared = true;
-            std::cout << "UNO declared!\n";
+            cout << "UNO declared!\n";
             continue;
         }
         bool validNumber = true;
@@ -292,7 +331,7 @@ int getPlayerChoice(const int player, const char currentColour, const int topCar
             return choice;
         }
 
-        std::cout << "Invalid input. Try again.\n";
+        cout << "Invalid input. Try again.\n";
     }
 }
 
@@ -303,9 +342,9 @@ void ifDrawnCardIsPlayable(const int currentPlayer, char& currentColour, const i
     }
     char decision;
     do {
-        std::cout << "Play this card? (Y/N): " << std::endl;
-        std::cin >> decision;
-        std::cin.ignore();
+        cout << "Play this card? (Y/N): " << endl;
+        cin >> decision;
+        cin.ignore();
     } while (decision != 'Y' && decision != 'N');
 
     if (decision == 'Y') {
@@ -319,12 +358,12 @@ void automaticDraw(const int currentPlayer, int deck[], int& deckIndex, int disc
     if (!colour || !value) {
         return;
     }
-    std::cout << "No playable cards. Drawing a card..." << std::endl;
+    cout << "No playable cards. Drawing a card..." << endl;
     drawCard(currentPlayer, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
     int drawnIndex = handSize[currentPlayer] - 1;
     findCardColour(hands[currentPlayer][drawnIndex], colour);
     findCardValue(hands[currentPlayer][drawnIndex], value);
-    std::cout << "You drew: " << colour << value << std::endl;
+    cout << "You drew: " << colour << value << endl;
 
     if (canPlayCard(hands[currentPlayer][drawnIndex], currentColour, topCard, colour, value)) {
         ifDrawnCardIsPlayable(currentPlayer, currentColour, topCard, colour, value, discardSize,
@@ -344,26 +383,23 @@ void nextPlayer(int& currentPlayer, const bool clockwise, const int numPlayers) 
 void reverseEffect(int& currentPlayer, bool& clockwise, const int players)
 {
     clockwise = !clockwise;
-    std::cout << "Direction reversed!" << std::endl;
-    if (players == 2) {
-        nextPlayer(currentPlayer, clockwise, players);//acts like skip if there are 2 players
-    }
+    cout << "Direction reversed!" << endl;
 }
 
 void skipEffect() {
-    std::cout << "Next player is skipped!" << std::endl;
+    cout << "Next player is skipped!" << endl;
 }
 
 void plusTwoEffect(int targetPlayer, const bool  clockwise, const int players, int deck[],
     int& deckIndex, int discardPile[], int& discardSize, int& currentDeckSize, int hands[][DECK_SIZE], int handSize[]) {
-        std::cout << "Next player draws 2 cards and is skipped!" << std::endl;
+        cout << "Next player draws 2 cards and is skipped!" << endl;
         drawCard(targetPlayer, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
         drawCard(targetPlayer, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
 }
 
 void plusFourEffect(int targetPlayer, const bool  clockwise, const int players, int deck[],
     int& deckIndex, int discardPile[], int& discardSize, int& currentDeckSize, int hands[][DECK_SIZE], int handSize[]) {
-    std::cout << "Next player draws 4 cards and is skipped!" << std::endl;
+    cout << "Next player draws 4 cards and is skipped!" << endl;
     for (int i = 0; i < 4; i++) {
         drawCard(targetPlayer, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
     }
@@ -374,21 +410,28 @@ void applyCardEffects(const int topCard, int& advanceCount, int currentPlayer, b
     if (isSkipCard(topCard)) {
         skipEffect();
         advanceCount = 2;
+        return;
     }
     if (isReverseCard(topCard)) {
         reverseEffect(currentPlayer, clockwise, players);
+        if (players == 2) {
+            advanceCount = 2; //acts like skip if there are 2 players
+        }
+        return;
     }
     if (isPlusTwoCard(topCard)) {
         int target = currentPlayer;
         nextPlayer(target, clockwise, players);
         plusTwoEffect(target, clockwise, players, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
         advanceCount = 2;
+        return;
     }
     if (isPlusFourCard(topCard)) {
         int target = currentPlayer;
         nextPlayer(target, clockwise, players);
         plusFourEffect(target, clockwise, players, deck, deckIndex, discardPile, discardSize, currentDeckSize, hands, handSize);
         advanceCount = 2;
+        return;
     }
 }
 
@@ -398,13 +441,13 @@ void determineColourOfFirstCard(const int topCard, char* colour, char* value,
         return;
     }
     if (isCardWild(topCard)) {
-        std::cout << "First card is a Wild!" << std::endl;
-        std::cout << "Player 1, these are your cards:" << std::endl;
+        cout << "First card is a Wild!" << endl;
+        cout << "Player 1, these are your cards:" << endl;
         showHand(0, hands, handSize, colour, value);
         do {
-            std::cout << "Choose a color (R/G/B/Y): " << std::endl;
-            std::cin >> currentColour;
-            std::cin.ignore();
+            cout << "Choose a color (R/G/B/Y): " << endl;
+            cin >> currentColour;
+            cin.ignore();
         } while (currentColour != 'R' && currentColour != 'G' &&
             currentColour != 'B' && currentColour != 'Y');
     }
@@ -418,7 +461,7 @@ void saveGame(int players, int currentPlayer, bool clockwise, char currentColour
     int deck[], int deckIndex, int currentDeckSize, int discardPile[], int discardSize, int handSize[]) {
     std::ofstream file("savegame.txt");
     if (!file) {
-        std::cout << "Failed to save game.\n";
+        cout << "Failed to save game.\n";
         return;
     }
 
@@ -449,19 +492,17 @@ void saveGame(int players, int currentPlayer, bool clockwise, char currentColour
     }
 
     file.close();
-    std::cout << "Game saved.\n";
+    cout << "Game saved.\n";
 }
 
 bool loadGame(int& players, int& currentPlayer, bool& clockwise, char& currentColour, int hands[][DECK_SIZE],
     int deck[], int& deckIndex, int& currentDeckSize, int discardPile[], int& discardSize, int handSize[]) {
     std::ifstream file("savegame.txt");
+    //file doesn't exist
     if (!file) {
         return false;
     }
-    char test;
-    if (!(file >> test)) { // try reading one character to check if file is empty
-        return false;
-    }
+    
     file >> players;
     file >> currentPlayer;
     file >> clockwise;
@@ -497,17 +538,17 @@ bool loadGame(int& players, int& currentPlayer, bool& clockwise, char& currentCo
 }
 /////UI functions/////
 void homeScreen() {
-    std::cout << "---UNO---" << std::endl << "Choose an action:" << std::endl;
-    std::cout << "[1] New game " << std::endl;
-    std::cout << "[2] Load saved game" << std::endl;
-    std::cout << "[3] Exit" << std::endl;
+    cout << "---UNO---" << endl << "Choose an action:" << endl;
+    cout << "[1] New game " << endl;
+    cout << "[2] Load saved game" << endl;
+    cout << "[3] Exit" << endl;
 }
 
 void gameScreen() {
-    std::cout << "---UNO---" << std::endl;
-    std::cout << "[1] Save game" << std::endl;
-    std::cout << "[2] Continue until next turn" << std::endl;
-    std::cout << "[3] Exit" << std::endl;
+    cout << "---UNO---" << endl;
+    cout << "[1] Save game" << endl;
+    cout << "[2] Continue until next turn" << endl;
+    cout << "[3] Exit" << endl;
 }
 
 bool validateChoice(const char choice) {
@@ -536,12 +577,12 @@ void gameLoop(int discardPile[], int& discardSize, char& currentColour, const in
     char choice;
     while (true) {
         gameScreen();
-        std::cin >> choice;
-        std::cin.ignore();
+        cin >> choice;
+        cin.ignore();
         while (!validateChoice(choice)) {
-            std::cout << "Invalid number. Please try again:" << std::endl;
-            std::cin >> choice;
-            std::cin.ignore();
+            cout << "Invalid number. Please try again:" << endl;
+            cin >> choice;
+            cin.ignore();
         }
         if (choice == '1') {
             saveGame(players, currentPlayer, clockwise, currentColour, hands,
@@ -557,10 +598,10 @@ void gameLoop(int discardPile[], int& discardSize, char& currentColour, const in
             bool unoDeclared = false;
             showTopCard(topCard, colour, value);
             if (isCardWild(topCard)) {
-                std::cout << "Current colour is: " << currentColour << std::endl;
+                cout << "Current colour is: " << currentColour << endl;
             }
-            std::cout << "Player " << currentPlayer + 1 << "'s turn" << std::endl;
-            std::cout << "Your cards are:" << std::endl;
+            cout << "Player " << currentPlayer + 1 << "'s turn" << endl;
+            cout << "Your cards are:" << endl;
             showHand(currentPlayer, hands, handSize, colour, value);
             if (!hasPlayableCard(currentPlayer, currentColour, topCard, hands, handSize, colour, value)) {
                 automaticDraw(currentPlayer, deck, deckIndex, discardPile, discardSize, colour, value, currentDeckSize,
@@ -572,14 +613,14 @@ void gameLoop(int discardPile[], int& discardSize, char& currentColour, const in
                 cardPlayed = true;
                 // UNO penalty
                 if (handSize[currentPlayer] == 1 && !unoDeclared) {
-                    std::cout << "You forgot to say UNO!" << std::endl;
-                    std::cout << "You drew a card!" << std::endl;
+                    cout << "You forgot to say UNO!" << endl;
+                    cout << "You drew a card!" << endl;
                     drawCard(currentPlayer, deck, deckIndex,
                         discardPile, discardSize, currentDeckSize, hands, handSize);
                 }
             }
             if (handSize[currentPlayer] == 0) {
-                std::cout << "Player " << currentPlayer + 1 << " wins!";
+                cout << "Player " << currentPlayer + 1 << " wins!";
                 break;
             }
             if (cardPlayed) {
@@ -610,12 +651,12 @@ int main()
     char colour[MAX_ELEMENTS_IN_DISPLAY_ARRAY], value[MAX_ELEMENTS_IN_DISPLAY_ARRAY];
     homeScreen();
     char choice;
-    std::cin >> choice;
-    std::cin.ignore();
+    cin >> choice;
+    cin.ignore();
     while (!validateChoice(choice)) {
-        std::cout << "Invalid number. Please try again:" << std::endl;
-        std::cin >> choice;
-        std::cin.ignore();
+        cout << "Invalid number. Please try again:" << endl;
+        cin >> choice;
+        cin.ignore();
     }
     if (choice == '3') {
         return 0;
@@ -624,7 +665,7 @@ int main()
 
         if (!loadGame(players, currentPlayer, clockwise, currentColour, hands, deck, deckIndex, currentDeckSize,
             discardPile, discardSize, handSize)) {
-            std::cout << "No saved game found, starting new game." << std::endl;
+            cout << "No saved game found, starting new game." << endl;
             players = chooseNumOfPlayers();
             newGame(deck, players, deckIndex, currentColour, hands, colour, value, discardPile, discardSize,
                 currentDeckSize, currentPlayer, clockwise, handSize);
@@ -632,7 +673,7 @@ int main()
         else {
             loadGame(players, currentPlayer, clockwise, currentColour, hands, deck, deckIndex, currentDeckSize, discardPile,
                 discardSize, handSize);
-            std::cout << "Game successfully loaded." << std::endl;
+            cout << "Game successfully loaded." << endl;
         }
         gameLoop(discardPile, discardSize, currentColour, players, colour, value, deck,
             deckIndex, currentDeckSize, currentPlayer, clockwise, hands, handSize);

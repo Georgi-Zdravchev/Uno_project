@@ -1,3 +1,17 @@
-.vs/ 
-bin/ 
-obj/ 
+# Visual Studio build folders
+x64/
+Debug/
+Release/
+
+# Compiled files
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.log
+
+# Visual Studio user files
+*.user
+*.suo
+*.ipch
+.vs/

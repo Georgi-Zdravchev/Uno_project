@@ -9,8 +9,10 @@ Release/
 *.pdb
 *.ilk
 *.log
+*.vcxproj
 
 # Visual Studio user files
+*.txt
 *.user
 *.suo
 *.ipch

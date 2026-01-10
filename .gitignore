@@ -10,6 +10,7 @@ Release/
 *.ilk
 *.log
 *.vcxproj
+*.slnx
 
 # Visual Studio user files
 *.txt

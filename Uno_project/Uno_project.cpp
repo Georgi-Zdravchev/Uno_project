@@ -30,7 +30,7 @@ const int MAX_PLAYERS = 4;
 const int STARTING_CARDS = 7;
 const int MAX_ELEMENTS_IN_DISPLAY_ARRAY = 4;
 const int MAX_STRING_SIZE = 100;
-const char unoCheck[4] = "uno";
+const char UNO_CHECK[4] = "uno";
 
 /////Utility functions/////
 void shuffleDeck(int deck[], const int number) {
@@ -311,7 +311,7 @@ int getPlayerChoice(const int player, const char currentColour, const int topCar
 
         cin.getline(input, MAX_STRING_SIZE);
         //check for uno
-        if (handSize[player] == 2 && compareStrings(input, unoCheck)) {
+        if (handSize[player] == 2 && compareStrings(input, UNO_CHECK)) {
 
             if (unoDeclared) {
                 cout << "UNO already declared.\n";
